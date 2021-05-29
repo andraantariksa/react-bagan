@@ -1,7 +1,8 @@
+/* eslint-disable */
 // React Cool Dimensions v2.0.6
 // https://github.com/wellyshen/react-cool-dimensions/tree/v2.0.6
 
-import { useState, useRef, useEffect, useCallback, RefObject } from "react";
+import {useState, useRef, useEffect, useCallback, RefObject} from 'react';
 
 const useLatest = <T>(val: T): RefObject<T> => {
   const ref = useRef(val);
@@ -43,12 +44,12 @@ export interface Options<T> {
   onResize?: OnResize<T>;
   polyfill?: any;
 }
-interface Return<T> extends Omit<Event<T>, "entry"> {
+interface Return<T> extends Omit<Event<T>, 'entry'> {
   entry?: ResizeObserverEntry;
 }
 
 const getCurrentBreakpoint = (bps: Breakpoints, w: number): string => {
-  let curBp = "";
+  let curBp = '';
   let max = -1;
 
   Object.keys(bps).forEach((key: string) => {
@@ -72,11 +73,11 @@ const useDimensions = <T extends HTMLElement | null>({
   polyfill,
 }: Options<T> = {}): Return<T> => {
   const [state, setState] = useState<State>({
-    currentBreakpoint: "",
+    currentBreakpoint: '',
     width: 0,
     height: 0,
   });
-  const prevSizeRef = useRef<{ width?: number; height?: number }>({});
+  const prevSizeRef = useRef<{width?: number; height?: number}>({});
   const prevBreakpointRef = useRef<string>();
   const observerRef = useRef<ResizeObserver>();
   const warnedRef = useRef<boolean>(false);
@@ -89,7 +90,7 @@ const useDimensions = <T extends HTMLElement | null>({
   }, []);
 
   const observe = useCallback<Observe<T>>(
-    (element) => {
+    element => {
       if (element && element !== ref.current) {
         unobserve();
         ref.current = element;
@@ -97,12 +98,12 @@ const useDimensions = <T extends HTMLElement | null>({
       if (observerRef.current && ref.current)
         observerRef.current.observe(ref.current as HTMLElement);
     },
-    [unobserve]
+    [unobserve],
   );
 
   useEffect(() => {
     if (
-      (!("ResizeObserver" in window) || !("ResizeObserverEntry" in window)) &&
+      (!('ResizeObserver' in window) || !('ResizeObserverEntry' in window)) &&
       !polyfill
     ) {
       console.error(observerErr);
@@ -114,7 +115,7 @@ const useDimensions = <T extends HTMLElement | null>({
     // eslint-disable-next-line compat/compat
     observerRef.current = new (polyfill || window.ResizeObserver)(
       ([entry]: any) => {
-        const { contentBoxSize, borderBoxSize, contentRect } = entry;
+        const {contentBoxSize, borderBoxSize, contentRect} = entry;
 
         let boxSize = contentBoxSize;
         if (useBorderBoxSize)
@@ -136,10 +137,10 @@ const useDimensions = <T extends HTMLElement | null>({
         )
           return;
 
-        prevSizeRef.current = { width, height };
+        prevSizeRef.current = {width, height};
 
         const e = {
-          currentBreakpoint: "",
+          currentBreakpoint: '',
           width,
           height,
           entry,
@@ -173,8 +174,8 @@ const useDimensions = <T extends HTMLElement | null>({
           updateOnBreakpointChange
         ) {
           rafId = requestAnimationFrame(() => {
-            setState((prev) =>
-              prev.currentBreakpoint !== next.currentBreakpoint ? next : prev
+            setState(prev =>
+              prev.currentBreakpoint !== next.currentBreakpoint ? next : prev,
             );
           });
           return;
@@ -183,7 +184,7 @@ const useDimensions = <T extends HTMLElement | null>({
         rafId = requestAnimationFrame(() => {
           setState(next);
         });
-      }
+      },
     );
 
     observe();
@@ -202,7 +203,7 @@ const useDimensions = <T extends HTMLElement | null>({
     updateOnBreakpointChange,
   ]);
 
-  return { ...state, observe, unobserve };
+  return {...state, observe, unobserve};
 };
 
 export default useDimensions;
