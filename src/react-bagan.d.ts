@@ -1,33 +1,38 @@
 declare module 'react-bagan' {
-  type BarProps = {
+  export type BarProps = {
     fill: string;
   };
 
-  type Data = {
+  export type Data = {
     value: number;
     bar?: BarProps;
   };
 
-  enum AxisType {
-    ValueTenth,
-    Value,
-    Tenth,
-  }
+  export type AxisType = 'valueTenth' | 'value' | 'tenth';
 
-  type BarChartProps = {
-    axisType: AxisType;
-    datas: Array<Data>;
+  export type Dimension = {
+    width: number;
+    height: number;
   };
 
-  type YAxisProps = {
+  export type BarChartProps = {
+    axisType: AxisType;
+    datas: Array<Data>;
+    dimensionAxis: Dimension;
+    dimensionChart: Dimension;
+  };
+
+  export type YAxisProps = {
     datas: Array<Data>;
     paddingRight?: number;
     type: AxisType;
+    dimension: Dimension;
   };
 
-  type BarChartInternalProps = {
+  export type BarChartInternalProps = {
     datas: Array<Data>;
     gridLine?: Record<string, unknown>;
     type: AxisType;
+    dimension: Dimension;
   };
 }

@@ -1,5 +1,1 @@
-import BarChart from './chart/BarChart';
-
-export default {
-  BarChart,
-};
+export {default as BarChart} from './chart/BarChart';
