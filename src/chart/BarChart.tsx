@@ -4,7 +4,8 @@ import {
   BarChartProps,
   Data,
   YAxisProps,
-} from 'react-bagan';
+  AxisType
+} from '../type';
 import {View, StyleSheet} from 'react-native';
 import {Svg, Rect, Text, Line} from 'react-native-svg';
 import {lerp} from '../math';

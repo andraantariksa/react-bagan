@@ -7,6 +7,8 @@ A charting library for react. Bagan aimed to be a minimal dependencies library.
 ## Features
 
 - [x] Vertical Bar Chart
+- [x] Spike Pie Chart
+- [x] Date Line Chart
 - [ ] ???
 
 ## Disclaimer
