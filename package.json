@@ -1,6 +1,6 @@
 {
   "name": "react-bagan",
-  "version": "0.1.2",
+  "version": "0.0.1-dev",
   "description": "A charting library for react",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -21,10 +21,10 @@
     "chart"
   ],
   "dependencies": {
-    "react-native-svg": "12.1.0",
-    "rollup-plugin-dts": "^3.0.2"
+    "react-native-svg": "12.1.1"
   },
   "devDependencies": {
+    "rollup-plugin-dts": "^3.0.2",
     "@babel/cli": "^7.14.3",
     "@babel/core": "^7.14.3",
     "@babel/preset-env": "^7.14.4",
