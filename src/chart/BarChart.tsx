@@ -1,25 +1,62 @@
 import * as React from 'react';
 import {
-  BarChartInternalProps,
-  BarChartProps,
-  Data,
-  YAxisProps,
-  AxisType
+  Dimension,
+  Position
 } from '../type';
 import {View, StyleSheet} from 'react-native';
 import {Svg, Rect, Text, Line} from 'react-native-svg';
 import {lerp} from '../math';
+import {oneToTen} from '../const';
 
-const oneToTen = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+export type BarChartBarProps = {
+  fill: string;
+};
 
-const YAxis = (props: YAxisProps) => {
-  const {
-    datas,
-    type,
-    paddingRight = 5,
-    dimension: {width, height},
-  } = props;
+export type BarChartAxisType = 'valueTenth' | 'value' | 'tenth';
 
+export type BarChartData = {
+  value: number;
+  bar?: BarChartBarProps;
+  label?: (leftBottomPosition: Position, value: number, index: number) => JSX.Element;
+};
+
+export type BarChartProps = {
+  axisType: BarChartAxisType;
+  datas: Array<BarChartData>;
+  axis?: BarChartYAxisProps;
+  topPadding?: number;
+  showLine?: boolean;
+  dimension: Dimension;
+};
+
+export type BarChartYAxisProps = {
+  dimension: Dimension;
+};
+
+type YAxisInternalProps = {
+  datas: Array<BarChartData>;
+  topPadding: number;
+  paddingRight?: number;
+  type: BarChartAxisType;
+  dimension: Dimension;
+};
+
+type BarChartInternalProps = {
+  datas: Array<BarChartData>;
+  showLine?: boolean;
+  topPadding: number;
+  gridLine?: Record<string, unknown>;
+  type: BarChartAxisType;
+  dimension: Dimension;
+};
+
+const YAxis = ({
+                 datas,
+                 type,
+                 paddingRight = 5,
+                 dimension: {width, height},
+                 topPadding
+               }: YAxisInternalProps) => {
   const startX = width - paddingRight;
   let maxValue = -Infinity;
   for (const data of datas) {
@@ -38,7 +75,7 @@ const YAxis = (props: YAxisProps) => {
         {oneToTen.map((data: number, index: number) => {
           const barHeight = lerp(
             0,
-            height - 10,
+            height - topPadding,
             (data * maxValueTenthDiv10) / maxValueTenth,
           );
           return (
@@ -59,8 +96,8 @@ const YAxis = (props: YAxisProps) => {
   } else if (type === 'value') {
     innerElement = (
       <>
-        {datas.map((data: Data, index: number) => {
-          const barHeight = lerp(0, height - 10, data.value / maxValue);
+        {datas.map((data: BarChartData, index: number) => {
+          const barHeight = lerp(0, height - topPadding, data.value / maxValue);
           return (
             <Text
               key={index}
@@ -82,7 +119,7 @@ const YAxis = (props: YAxisProps) => {
         {oneToTen.map((data: number, index: number) => {
           const barHeight = lerp(
             0,
-            height - 10,
+            height - topPadding,
             (data * maxValueDiv10) / maxValue,
           );
           return (
@@ -108,15 +145,14 @@ const YAxis = (props: YAxisProps) => {
   );
 };
 
-const BarChartInternal = (props: BarChartInternalProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {
-    datas,
-    gridLine = {fill: 'black'},
-    type,
-    dimension: {width, height},
-  } = props;
-
+const BarChartInternal = ({
+  datas,
+  gridLine = {fill: 'black'},
+  type,
+  dimension: {width, height},
+  showLine = false,
+  topPadding
+}: BarChartInternalProps) => {
   let maxValue = -Infinity;
   for (const data of datas) {
     maxValue = Math.max(data.value, maxValue);
@@ -125,20 +161,21 @@ const BarChartInternal = (props: BarChartInternalProps) => {
   const maxValueTenth = Math.pow(10, Math.floor(Math.log10(maxValue) + 1));
   const maxValueDiv10 = maxValue / 10;
   const maxValueTenthDiv10 = maxValueTenth / 10;
+  const marginBottomLabel = 10;
 
   let innerElement;
   if (type === 'tenth') {
     innerElement = (
       <>
-        {oneToTen.map((data: number, index: number) => {
+        {showLine && oneToTen.map((data: number, index: number) => {
           const barHeight = lerp(
             0,
-            height - 10,
+            height - topPadding,
             (data * maxValueTenthDiv10) / maxValueTenth,
           );
           return (
             <Line
-              key={index}
+              key={3 * index + 1}
               x1={0}
               y1={height - barHeight}
               x2={width}
@@ -147,18 +184,25 @@ const BarChartInternal = (props: BarChartInternalProps) => {
             />
           );
         })}
-        {datas.map((data: Data, index: number) => {
-          const barHeight = lerp(0, height - 10, data.value / maxValueTenth);
+        {datas.map((data: BarChartData, index: number) => {
+          const barHeight = lerp(0, height - topPadding, data.value / maxValueTenth);
           const {bar = {fill: 'red'}} = data;
+          const position = {
+            x: widthItem + widthItem * index * 2,
+            y: height - barHeight - marginBottomLabel
+          };
           return (
-            <Rect
-              key={index}
-              x={widthItem + widthItem * index * 2}
-              y={height - barHeight}
-              width={widthItem}
-              height={barHeight}
-              fill={bar.fill}
-            />
+            <>
+              {data.label?.(position, data.value, index)}
+              <Rect
+                key={3 * index + 2}
+                x={position.x}
+                y={position.y + marginBottomLabel}
+                width={widthItem}
+                height={barHeight}
+                fill={bar.fill}
+              />
+            </>
           );
         })}
       </>
@@ -166,11 +210,11 @@ const BarChartInternal = (props: BarChartInternalProps) => {
   } else if (type === 'value') {
     innerElement = (
       <>
-        {datas.map((data: Data, index: number) => {
-          const barHeight = lerp(0, height - 10, data.value / maxValue);
+        {showLine && datas.map((data: BarChartData, index: number) => {
+          const barHeight = lerp(0, height - topPadding, data.value / maxValue);
           return (
             <Line
-              key={index}
+              key={3 * index + 1}
               x1={0}
               y1={height - barHeight}
               x2={width}
@@ -179,18 +223,25 @@ const BarChartInternal = (props: BarChartInternalProps) => {
             />
           );
         })}
-        {datas.map((data: Data, index: number) => {
-          const barHeight = lerp(0, height - 10, data.value / maxValue);
+        {datas.map((data: BarChartData, index: number) => {
+          const barHeight = lerp(0, height - topPadding, data.value / maxValue);
           const {bar = {fill: 'red'}} = data;
+          const position = {
+            x: widthItem + widthItem * index * 2,
+            y: height - barHeight - marginBottomLabel
+          };
           return (
-            <Rect
-              key={index}
-              x={widthItem + widthItem * index * 2}
-              y={height - barHeight}
-              width={widthItem}
-              height={barHeight}
-              fill={bar.fill}
-            />
+            <>
+              {data.label?.(position, data.value, index)}
+              <Rect
+                key={3 * index + 2}
+                x={position.x}
+                y={position.y + marginBottomLabel}
+                width={widthItem}
+                height={barHeight}
+                fill={bar.fill}
+              />
+            </>
           );
         })}
       </>
@@ -198,15 +249,15 @@ const BarChartInternal = (props: BarChartInternalProps) => {
   } else {
     innerElement = (
       <>
-        {oneToTen.map((data: number, index: number) => {
+        {showLine && oneToTen.map((data: number, index: number) => {
           const barHeight = lerp(
             0,
-            height - 10,
+            height - topPadding,
             (data * maxValueDiv10) / maxValue,
           );
           return (
             <Line
-              key={index}
+              key={3 * index + 1}
               x1={0}
               y1={height - barHeight}
               x2={width}
@@ -215,18 +266,25 @@ const BarChartInternal = (props: BarChartInternalProps) => {
             />
           );
         })}
-        {datas.map((data: Data, index: number) => {
-          const barHeight = lerp(0, height - 10, data.value / maxValue);
+        {datas.map((data: BarChartData, index: number) => {
+          const barHeight = lerp(0, height - topPadding, data.value / maxValue);
           const {bar = {fill: 'red'}} = data;
+          const position = {
+            x: widthItem + widthItem * index * 2,
+            y: height - barHeight - marginBottomLabel
+          };
           return (
-            <Rect
-              key={index}
-              x={widthItem + widthItem * index * 2}
-              y={height - barHeight}
-              width={widthItem}
-              height={barHeight}
-              fill={bar.fill}
-            />
+            <>
+              {data.label?.(position, data.value, index)}
+              <Rect
+                key={3 * index + 2}
+                x={position.x}
+                y={position.y + marginBottomLabel}
+                width={widthItem}
+                height={barHeight}
+                fill={bar.fill}
+              />
+            </>
           );
         })}
       </>
@@ -240,17 +298,17 @@ const BarChartInternal = (props: BarChartInternalProps) => {
   );
 };
 
-const BarChart = (props: BarChartProps): JSX.Element => {
-  const {axisType = 'valueTenth', datas, dimensionAxis, dimensionChart} = props;
-
+const BarChart = ({axisType = 'valueTenth', datas, dimension, axis, showLine, topPadding = 10}: BarChartProps): JSX.Element => {
   return (
     <View>
       <View style={styles.containerChart}>
-        <YAxis datas={datas} type={axisType} dimension={dimensionAxis} />
+        {axis && <YAxis datas={datas} type={axisType} dimension={axis.dimension} topPadding={topPadding} />}
         <BarChartInternal
+          topPadding={topPadding}
+          showLine={showLine}
           datas={datas}
           type={axisType}
-          dimension={dimensionChart}
+          dimension={dimension}
         />
       </View>
     </View>

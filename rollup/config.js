@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescript2 from 'rollup-plugin-typescript2';
 import jsx from 'acorn-jsx';
 import dts from 'rollup-plugin-dts';
+import del from 'rollup-plugin-delete';
 
 import pkg from '../package.json';
 
@@ -38,7 +39,7 @@ export default [
   },
   {
     input: 'dist/type/index.d.ts',
-    output: [{file: 'dist/type/dist/index.d.ts', format: 'es'}],
+    output: [{file: 'dist/index.d.ts', format: 'es'}],
     plugins: [dts()],
   }
 ];

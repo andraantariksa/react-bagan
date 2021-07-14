@@ -11,3 +11,4 @@ export const range = (
   y2: number,
   a: number,
 ): number => lerp(x2, y2, invlerp(x1, y1, a));
+export const rotate2D = (x: number, y: number, r: number) => [x * Math.cos(r) - y * Math.sin(r), x * Math.sin(r) + y * Math.cos(r)];
