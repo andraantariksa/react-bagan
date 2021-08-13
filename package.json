@@ -1,6 +1,6 @@
 {
   "name": "react-bagan",
-  "version": "0.3.6-dev",
+  "version": "1.0.2-dev",
   "description": "A charting library for react",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -61,5 +61,8 @@
     "react-native": ">=0.50.0",
     "react-native-svg": "12.1.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "d3": "^5.15.0",
+    "d3-shape": "^3.0.1"
+  }
 }
