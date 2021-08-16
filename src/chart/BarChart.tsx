@@ -157,6 +157,9 @@ const BarChartInternal = ({
   for (const data of datas) {
     maxValue = Math.max(data.value, maxValue);
   }
+  if (maxValue === 0) {
+    maxValue = 10;
+  }
   const widthItem = width / (datas.length * 2 + 1);
   const maxValueTenth = Math.pow(10, Math.floor(Math.log10(maxValue) + 1));
   const maxValueDiv10 = maxValue / 10;
