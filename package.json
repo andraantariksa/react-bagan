@@ -1,6 +1,6 @@
 {
   "name": "react-bagan",
-  "version": "1.0.9-dev",
+  "version": "1.0.10-dev",
   "description": "A charting library for react",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
