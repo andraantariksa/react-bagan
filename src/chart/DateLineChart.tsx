@@ -2,7 +2,7 @@ import { Circle, G, Line, Path, Rect, Svg, Text, } from 'react-native-svg';
 import * as React from 'react';
 import * as d3 from 'd3';
 import * as d3s from 'd3-shape';
-import { PanResponder } from 'react-native';
+import { PanResponder, PanResponderInstance } from 'react-native';
 import { clamp } from '../math';
 import { Color, Dimension } from "../type";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -68,6 +68,7 @@ export function DateLineChart<T>({
                                    cursorLineWidth,
                                    cursorCallback
                                  }: DateLineChartProps<T>) {
+  const [showInfo, setShowInfo] = useState(false);
   const x = useCallback(
     d3
       .scaleTime()
@@ -104,39 +105,49 @@ export function DateLineChart<T>({
       .range([padding[3], width - padding[1]]),
     [data, padding, width],
   );
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt, gestureState) => {
-        const mappedX = clamp(
-          Math.round(xMapper.invert(gestureState.moveX)),
-          0,
-          data.length - 1,
-        );
-        const selectedData = data[mappedX];
-        setPos({
-          x: x(selectedData.date),
-          y: y(selectedData.value),
-          value: selectedData,
-          index: mappedX,
-        });
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        const mappedX = clamp(
-          Math.round(xMapper.invert(gestureState.moveX)),
-          0,
-          data.length - 1,
-        );
-        const selectedData = data[mappedX];
-        setPos({
-          x: x(selectedData.date),
-          y: y(selectedData.value),
-          value: selectedData,
-          index: mappedX,
-        });
-      },
-    }),
-  );
+  const panResponder = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: (evt, gestureState) => {
+      const mappedX = clamp(
+        Math.round(xMapper.invert(gestureState.moveX)),
+        0,
+        data.length - 1,
+      );
+      const selectedData = data[mappedX];
+      setPos({
+        x: x(selectedData.date),
+        y: y(selectedData.value),
+        value: selectedData,
+        index: mappedX,
+      });
+      setShowInfo(true);
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      const mappedX = clamp(
+        Math.round(xMapper.invert(gestureState.moveX)),
+        0,
+        data.length - 1,
+      );
+      const selectedData = data[mappedX];
+      setPos({
+        x: x(selectedData.date),
+        y: y(selectedData.value),
+        value: selectedData,
+        index: mappedX,
+      });
+    },
+    onPanResponderEnd: (evt, gestureState) => {
+      const index = data.length - 1;
+      const selectedData = data[index];
+      setPos({
+        x: x(selectedData.date),
+        y: y(selectedData.value),
+        value: selectedData,
+        index,
+      });
+      setShowInfo(false);
+    },
+  }));
   useEffect(() => {
     panResponder.current = PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
@@ -153,6 +164,7 @@ export function DateLineChart<T>({
           value: selectedData,
           index: mappedX,
         });
+        setShowInfo(true);
       },
       onPanResponderMove: (evt, gestureState) => {
         const mappedX = clamp(
@@ -168,8 +180,20 @@ export function DateLineChart<T>({
           index: mappedX,
         });
       },
+      onPanResponderEnd: (evt, gestureState) => {
+        const index = data.length - 1;
+        const selectedData = data[index];
+        setPos({
+          x: x(selectedData.date),
+          y: y(selectedData.value),
+          value: selectedData,
+          index,
+        });
+        setShowInfo(false);
+      },
     });
   }, [data, x, xMapper, y]);
+
   useEffect(() => {
     cursorCallback?.(pos);
   }, [pos]);
@@ -197,6 +221,7 @@ export function DateLineChart<T>({
           strokeOpacity={formerPathOpacity}
           strokeWidth={pathWidth}
         />
+        { showInfo && <>
         <Line
           x1={pos.x}
           y1={padding[0] - textRectGap}
@@ -227,6 +252,7 @@ export function DateLineChart<T>({
           {...textProps}>
           {rectText(pos)}
         </Text>
+        </>}
         <Circle
           cx={pos.x}
           cy={pos.y}
